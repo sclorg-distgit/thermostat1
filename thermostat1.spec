@@ -8,12 +8,12 @@
 %global debug_package %{nil}
 
 Name:       %scl_name
-Version:    2.0
+Version:    2.2
 # Release should be higher than el6 builds. Use convention
 # 60.X where X is an increasing int. 60 for rhel-6. We use
 # 70.X for rhel-7. For some reason we cannot rely on the
 # dist tag.
-Release:    70.9%{?dist}
+Release:    70.2%{?dist}
 Summary:    Package that installs %scl
 
 License:    GPLv2+
@@ -324,11 +324,14 @@ install -p -m 644 configuration.xml %{buildroot}%{_sysconfdir}/xdg/xmvn/
 # Create java/maven/icons directories so that they'll get properly owned.
 # These are listed in the scl_files macro. See also: RHBZ#1057169
 mkdir -p %{buildroot}%{_javadir}
-mkdir -p %{buildroot}%{_prefix}/lib/java
+mkdir -p %{buildroot}%{_jnidir}
 mkdir -p %{buildroot}%{_javadocdir}
 mkdir -p %{buildroot}%{_mavenpomdir}
 mkdir -p %{buildroot}%{_datadir}/maven-effective-poms
+mkdir -p %{buildroot}%{_datadir}/maven-metadata
 mkdir -p %{buildroot}%{_mavendepmapfragdir}
+mkdir -p %{buildroot}%{_datadir}/licenses
+mkdir -p %{buildroot}%{_libdir}
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
 
 # install generated man page
@@ -355,10 +358,14 @@ install -p -m 644 macros.%{scl_name_base}-scldevel %{buildroot}%{_root_sysconfdi
 %{_sysconfdir}/java/javapackages-config.json
 %{_sysconfdir}/xdg/xmvn/configuration.xml
 %dir %{_javadir}
+%dir %{_jnidir}
 %dir %{_javadocdir}
 %dir %{_mavenpomdir}
 %dir %{_datadir}/maven-effective-poms
+%dir %{_datadir}/maven-metadata
 %dir %{_mavendepmapfragdir}
+%dir %{_datadir}/licenses
+%dir %{_libdir}
 
 %files build
 %{_root_sysconfdir}/rpm/macros.%{scl}-config
@@ -368,6 +375,13 @@ install -p -m 644 macros.%{scl_name_base}-scldevel %{buildroot}%{_root_sysconfdi
 
 
 %changelog
+* Wed Mar 30 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-70.2
+- Own collection directories.
+- Resolves: RHBZ#1317970
+
+* Wed Jan 27 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-70.1
+- Rebuild for RHSCL 2.2.
+
 * Wed Jan 28 2015 Omair Majid <omajid@redhat.com> - 2.0-70.9
 - Require mongodb26 scl.
 
