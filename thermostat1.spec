@@ -8,12 +8,12 @@
 %global debug_package %{nil}
 
 Name:       %scl_name
-Version:    2.0
+Version:    2.2
 # Release should be higher than el7 builds. Use convention
 # 60.X where X is an increasing int. 60 for rhel-6. We use
 # 70.X for rhel-7. For some reason we cannot rely on the
 # dist tag.
-Release:    60.9%{?dist}
+Release:    60.4%{?dist}
 Summary:    Package that installs %scl
 
 License:    GPLv2+
@@ -241,6 +241,13 @@ chmod a+x h2m_helper
 # generate the man page
 help2man -N --section 7 ./h2m_helper -o %{scl_name}.7
 
+# Fix single quotes in man page. See RHBZ#1219531
+#
+# http://lists.gnu.org/archive/html/groff/2008-06/msg00001.html suggests that
+# using "'" for quotes is correct, but the current implementation of man in 6
+# mangles it when rendering.
+sed -i "s/'/\\\\(aq/g" %{scl_name}.7
+
 
 %install
 # Parentheses are needed here as workaround for rhbz#1017085
@@ -251,6 +258,7 @@ install -p -m 755 enable %{buildroot}%{_scl_scripts}/
 
 install -d -m 755 %{buildroot}%{_sysconfdir}/java
 install -p -m 644 java.conf %{buildroot}%{_sysconfdir}/java/
+install -p -m 644 javapackages-config.json %{buildroot}%{_sysconfdir}/java/
 
 install -d -m 755 %{buildroot}%{_sysconfdir}/xdg/xmvn
 install -p -m 644 configuration.xml %{buildroot}%{_sysconfdir}/xdg/xmvn/
@@ -262,6 +270,7 @@ mkdir -p %{buildroot}%{_prefix}/lib/java
 mkdir -p %{buildroot}%{_javadocdir}
 mkdir -p %{buildroot}%{_mavenpomdir}
 mkdir -p %{buildroot}%{_datadir}/maven-effective-poms
+mkdir -p %{buildroot}%{_datadir}/maven-metadata
 mkdir -p %{buildroot}%{_mavendepmapfragdir}
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/scalable/apps
 
@@ -281,9 +290,12 @@ install -p -m 644 macros.%{scl_name_base}-scldevel %{buildroot}%{_root_sysconfdi
 %{scl_files}
 %doc LICENSE
 %doc README
+%dir %{_sysconfdir}/java
 %{_mandir}/man7/%{scl_name}.*
 %{_sysconfdir}/java/java.conf
+%{_sysconfdir}/java/javapackages-config.json
 %{_sysconfdir}/xdg/xmvn/configuration.xml
+%dir %{_datadir}/maven-metadata
 
 %files build
 %{_root_sysconfdir}/rpm/macros.%{scl}-config
@@ -292,6 +304,19 @@ install -p -m 644 macros.%{scl_name_base}-scldevel %{buildroot}%{_root_sysconfdi
 %{_root_sysconfdir}/rpm/macros.%{scl_name_base}-scldevel
 
 %changelog
+* Wed Mar 30 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-60.4
+- Own in collection directories.
+- Resolves: RHBZ#1317970
+
+* Tue Mar 15 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-60.3
+- Install javapackages-config.json file.
+
+* Wed Jan 27 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-60.2
+- Apply patch for RHBZ#1219531. Fix quotes in man page.
+
+* Wed Jan 27 2016 Severin Gehwolf <sgehwolf@redhat.com> - 2.2-60.1
+- Rebuild for RHSCL 2.2 update.
+
 * Wed Jan 28 2015 Omair Majid <omajid@redhat.com> - 2.0-60.9
 - Require mongodb26 scl.
 
